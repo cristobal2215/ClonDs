@@ -1,8 +1,15 @@
 "use client";
 
 import * as z from "zod";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import React, { useEffect } from "react";
+import { FileUpload } from "../file-upload";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm } from "react-hook-form";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 import {
     Dialog,
     DialogContent,
@@ -21,11 +28,6 @@ import {
     FormMessage
 } from "@/components/ui/form"
 
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import React, { useEffect } from "react";
-
 const formSchema = z.object({
     name: z.string().min(1, {
         message:"Name is required."
@@ -37,6 +39,8 @@ const formSchema = z.object({
 
 export const InitialModal = () => {
     const [isMounted, setIsMounted] = useState(false);
+    const router = useRouter();
+
     useEffect(() => {
         setIsMounted(true);
     }, []); 
@@ -50,7 +54,14 @@ export const InitialModal = () => {
 
     const isLoading = form.formState.isSubmitting;
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
-        console.log(values);
+        try {
+            await axios.post("/api/servers", values)
+            form.reset();
+            router.refresh();
+            window.location.reload();
+        }catch(error) {
+            console.log(values);
+        }
     }
 
     if (!isMounted) {
@@ -71,7 +82,21 @@ export const InitialModal = () => {
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                         <div className="space-y-8">
                             <div className="flex items-center justify-center text-center">
-                                TODO: Image Upload
+                                <FormField 
+                                    control= {form.control}
+                                    name= "imageUrl"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormControl>
+                                                <FileUpload 
+                                                    endpoint="serverImage"
+                                                    value={field.value}
+                                                    onChange={field.onChange}
+                                                />
+                                            </FormControl>
+                                        </FormItem>
+                                    )}
+                                />
                             </div>
                             <FormField 
                                 control={form.control}
