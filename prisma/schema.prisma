@@ -16,7 +16,6 @@ model Profile {
   email String @db.Text
   createAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
   servers Server[]
   members Member[]
   channels Channel[]
@@ -58,6 +57,7 @@ model Member {
   @@index([serverId])
 }
 
+//tipos de canal
 enum ChannelType {
   TEXT
   AUDIO
